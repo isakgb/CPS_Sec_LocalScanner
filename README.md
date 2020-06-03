@@ -1,1 +1,21 @@
-# CPS_Sec_LocalScanner
+# CPS Security Local Network Scanner
+
+##### Code implemented so far:
+
+In the network package a few files related to network scanning can be found.
+ 
+`host.py` contains object representations of hosts and ports which is used by the network scanner.
+
+`networkinterface.py` contains an object representation of network interfaces. 
+
+`network_scanner.py` contains the actual network scanner. Create a network scanner object by calling `scanner = NetworkScanner.create()`.
+
+This object has methods such as:
+
+`scanner.get_network_interfaces()` which returns a list of network interface objects. (This currently only works on Windows set to English language. We will start using linux and fix this.)
+
+`scanner.scan_network(nif, port_scan=False)` which takes a network interface as an argument and port_scan as an optional argument and returns a list of Host objects.
+
+`scanner.scan_network_callback(nif, callback, port_scan=False)` is similar to the aboce except it also takes a callback function as an argument. The scan will run asynchronously in a new thread and call the callback function with the result when it is done. This is useful as it prevent the scan from blocking the main thread.
+
+ 
