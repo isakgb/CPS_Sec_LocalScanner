@@ -32,7 +32,7 @@ This object has methods such as:
  
  - We've not yet connected the actual data with the GUI. (This is a virtual list.)
  - we plan to add a function that allows users to view detailed information of device when user double-clicks an item of list.
- - We've not implement the function of scan button and history button yet, but it can be soon.
+ - The function of the scan button and the history button has not yet been implemented.
  
  
  #### Version
