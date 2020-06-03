@@ -36,5 +36,5 @@ This object has methods such as:
  
  
  #### Version
- Python 3.6.10
- pyqt 5.9.2
+ - Python 3.6.10
+ - pyqt 5.9.2
