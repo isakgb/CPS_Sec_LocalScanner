@@ -38,3 +38,9 @@ This object has methods such as:
  #### Version
  - Python 3.6.10
  - pyqt 5.9.2
+ 
+ 
+ #### Plans (June 4, 2020. ~)
+ - We will solve the problem about encoding error by using virtual-box or another method.
+ - We will connect scanning code with GUI code.
+ - We will implement a function to disconnect devices by using 'aircrack-ng'
