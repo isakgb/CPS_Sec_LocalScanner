@@ -148,8 +148,6 @@ class NetworkScannerUnixlike(NetworkScanner):
             print(line.encode())
 
 
-
-
 def check_nmap_installed():
     try:
         d = run("ifconfig --version", stdout=PIPE)
