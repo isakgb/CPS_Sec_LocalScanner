@@ -1,5 +1,14 @@
 # CPS Security Local Network Scanner
 
+#### Before use:
+
+Create a file `usersettings.json` in the main directory which should look like this:
+```
+{
+  "interface": "<name of interface for local network>"
+}
+```
+
 ##### Code implemented so far:
 
 In the network package a few files related to network scanning can be found.
@@ -12,7 +21,7 @@ In the network package a few files related to network scanning can be found.
 
 This object has methods such as:
 
-`scanner.get_network_interfaces()` which returns a list of network interface objects. (This currently only works on Windows set to English language. We will start using linux and fix this.)
+`scanner.get_network_interface()` which returns the correct network interface object as specified in `usersettings.json`.
 
 `scanner.scan_network(nif, port_scan=False)` which takes a network interface as an argument and port_scan as an optional argument and returns a list of Host objects.
 
