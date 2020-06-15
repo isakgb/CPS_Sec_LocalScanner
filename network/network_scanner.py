@@ -3,12 +3,15 @@ from network.networkinterface import NetworkInterface
 from typing import List
 import threading
 from network.host import Host, Port
+import psutil
+from util.usersettings import UserSettings
+import socket
 
 class NetworkScanner():
 
     def __init__(self):
         self.nmap_installed = None
-        raise TypeError("Cannot create NetworkScanner. Use NetworkScanner.create()")
+        #raise TypeError("Cannot create NetworkScanner. Use NetworkScanner.create()")
 
     def scan_network(self, network_interface: NetworkInterface, port_scan=False) -> List[Host]:
         nmap_args = ["nmap"]
@@ -70,6 +73,8 @@ class NetworkScanner():
         :return: An instance of NetworkScanner for this operating system
         """
         # Figure out if this is a unix-like or windows system, and return the appropriate scanner instance
+
+        return NetworkScanner()
         try:
             run(["ifconfig", "--version"], stdout=PIPE)
             print("OS is Unix-like")
@@ -84,69 +89,20 @@ class NetworkScanner():
         except FileNotFoundError:
             print("Found neither ipconfig nor ifconfig")
 
-    def get_network_interfaces(self) -> List[NetworkInterface]:
+    def get_network_interface(self) -> NetworkInterface:
         """
-        Gets a list of active local network interfaces
+        Gets the active local interface with name specified form usersettings.json
 
-        :return: List of NetworkInterface objects
+        :return: NetworkInterface objects
         """
-        raise NotImplementedError()
-
-
-class NetworkScannerWindows(NetworkScanner):
-
-    def __init__(self):
-        pass
-
-    def get_network_interfaces(self):
-
-        def get_nonempty_lines(ipconfig_output):
-            for output_line in ipconfig_output.split("\r\n"):
-                if len(output_line) > 0 and output_line != "Windows IP Configuration":
-                    yield output_line
-
-        ipconfig_result = run("ipconfig", stdout=PIPE).stdout.decode()
-
-        next_nif = None
-        nifs = []
-
-        for line in get_nonempty_lines(ipconfig_result):
-            if line[:3] != "   ":
-                if next_nif is not None:
-                    nifs.append(next_nif)
-                next_nif = NetworkInterface()
-                next_nif.name = line
-            else:
-                if "Media disconnected" in line:
-                    next_nif.disconnected = True
-                elif "IPv4 Address" in line:
-                    next_nif.ipv4 = line.split(" : ")[1]
-                elif "Subnet Mask" in line:
-                    next_nif.subnet_mask = line.split(" : ")[1]
-                elif "Default Gateway" in line:
-                    next_nif.default_gateway = line.split(" : ")[1]
-
-        nifs = [nif for nif in nifs if not nif.disconnected]
-
-        return nifs
-
-
-class NetworkScannerUnixlike(NetworkScanner):
-    def __init__(self):
-        pass
-
-    def get_network_interfaces(self):
-        # TODO: Implement this feature on non-Windows systems
-
-        ipconfig_result = run("ifconfig", stdout=PIPE).stdout.decode()
-
-        # Split each interface
-
-        nifs = []
-
-        for line in ipconfig_result.split("\n"):
-            print(line.encode())
-
+        interfaces = psutil.net_if_addrs()
+        chosen_interface = UserSettings.get_instance().interface
+        ipv4_interface = next((x for x in interfaces[chosen_interface] if x.family == socket.AF_INET))
+        nif = NetworkInterface()
+        nif.name = UserSettings.get_instance().interface
+        nif.ipv4 = ipv4_interface.address
+        nif.subnet_mask = ipv4_interface.netmask
+        return nif
 
 def check_nmap_installed():
     try:

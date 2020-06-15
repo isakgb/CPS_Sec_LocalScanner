@@ -212,3 +212,6 @@ pip-selfcheck.json
 .idea/
 
 macvendors.json
+usersettings.json
+history.json
+devicesettings.json

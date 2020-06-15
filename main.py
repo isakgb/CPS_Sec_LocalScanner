@@ -2,7 +2,6 @@ from network.network_scanner import NetworkScanner
 from util.macvendor import MacVendorsApi
 
 
-
 def nmap_result_callback(hosts):
     print("scan finished")
     for host in hosts:
@@ -15,11 +14,10 @@ def nmap_result_callback(hosts):
 
 scanner = NetworkScanner.create()
 
-network_interfaces = scanner.get_network_interfaces()
+nif = scanner.get_network_interface()
 
-print("Found network interfaces:", network_interfaces)
+print("Found network interface:", nif)
 
-nif = network_interfaces[0]
 
 scanner.scan_network_callback(nif, nmap_result_callback, port_scan=True)
 print("Network scan started asynchronously")
