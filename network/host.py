@@ -1,10 +1,14 @@
 from typing import List
+from util.macvendor import MacVendorsApi
 
 class Host:
     def __init__(self):
         self.ports: List[Port] = []
         self.mac_address = None
         self.ip_address = None
+
+    def get_GUI_name(self):
+        return "IP: {}, MAC: {} ({})".format(self.ip_address, self.mac_address, MacVendorsApi.get_instance().get_vendor(self.mac_address))
 
 
 class Port:

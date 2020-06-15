@@ -1,4 +1,6 @@
-from network.network_scanner import NetworkScanner
+import sys
+
+from LocalNetworkGUI.Home_IoT_Security import MyApp, QApplication
 from util.macvendor import MacVendorsApi
 
 
@@ -12,13 +14,7 @@ def nmap_result_callback(hosts):
             print("    ", port.port_id, port.protocol, port.service)
 
 
-scanner = NetworkScanner()
-
-nif = scanner.get_network_interface()
-
-print("Found network interface:", nif)
-
-
-scanner.scan_network_callback(nif, nmap_result_callback, port_scan=True)
-print("Network scan started asynchronously")
-print(nif.get_nmap_arg())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = MyApp()
+    sys.exit(app.exec_())

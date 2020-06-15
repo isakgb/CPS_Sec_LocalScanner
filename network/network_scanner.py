@@ -46,17 +46,21 @@ class NetworkScanner():
 
         return hosts
 
-    def scan_network_callback(self, network_interface: NetworkInterface, callback, port_scan=False):
+    def scan_network_callback(self, callback, network_interface: NetworkInterface = None, port_scan=False):
         """
         Starts an asynchronous (non-blocking) network scan on the given network interface. When the scan is complete
         the callback will be called with the list of hosts as the argument. Port scanning can be enabled by setting
         port_scan to True.
 
-        :param network_interface: A NetworkInterface object corresponding to the network interface you want to scan.
+        :param network_interface: A NetworkInterface object corresponding to the network interface you want to scan. Default:
+        network interface given by get_network_interface()
         :param callback: A function taking a list of Host objects as an argument that will be called when the scan
         is completed.
         :param port_scan: Whether or not to port scan each host. Defaults to False.
         """
+        if network_interface is None:
+            network_interface = self.get_network_interface()
+
         def scan_network_with_callback():
             scan_result = self.scan_network(network_interface, port_scan=port_scan)
             callback(scan_result)

@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from network.network_scanner import NetworkScanner
 
 class MyApp(QMainWindow):
 
@@ -11,6 +12,7 @@ class MyApp(QMainWindow):
         super().__init__()
         self.datetime = QDateTime.currentDateTime()
         self.initUI()
+        self.scanner = NetworkScanner()
 
     def initUI(self):
 
@@ -39,13 +41,13 @@ class MyApp(QMainWindow):
             item = self.iotList.item(i)
             item.setText(_translate("iotList", " Device " + str(i + 1) + "\r\n\r\n"))
             if item.state == 0:
-                item.setIcon(QIcon('dangericon.png'))
+                item.setIcon(QIcon('LocalNetworkGUI/dangericon.png'))
                 item.setBackground(QColor(255, 195, 200))
             elif item.state == 1:
-                item.setIcon(QIcon('safeicon.png'))
+                item.setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
                 item.setBackground(QColor(200, 255, 200))
             else:
-                item.setIcon(QIcon('disconnecticon.png'))
+                item.setIcon(QIcon('LocalNetworkGUI/disconnecticon.png'))
                 item.setBackground(QColor(200, 200, 200))
 
 
@@ -53,7 +55,7 @@ class MyApp(QMainWindow):
         scanbtn = QPushButton('Scan', self)
         scanbtn.setCheckable(False)
         scanbtn.move(20, 20)
-        scanbtn.setIcon(QIcon('scanicon.png'))
+        scanbtn.setIcon(QIcon('LocalNetworkGUI/scanicon.png'))
         scanbtn.resize(scanbtn.sizeHint())
         scanbtn.clicked.connect(self.scan_Click)
         scanbtn.toggle()
@@ -62,7 +64,7 @@ class MyApp(QMainWindow):
         addbtn = QPushButton('Add a device', self)
         addbtn.setCheckable(False)
         addbtn.move(165, 20)
-        addbtn.setIcon(QIcon('addicon.png'))
+        addbtn.setIcon(QIcon('LocalNetworkGUI/addicon.png'))
         addbtn.resize(addbtn.sizeHint())
         addbtn.clicked.connect(self.add_Click)
         addbtn.toggle()
@@ -72,7 +74,7 @@ class MyApp(QMainWindow):
         deletebtn = QPushButton('Delete a device', self)
         deletebtn.setCheckable(False)
         deletebtn.move(336, 20)
-        deletebtn.setIcon(QIcon('deleteicon.png'))
+        deletebtn.setIcon(QIcon('LocalNetworkGUI/deleteicon.png'))
         deletebtn.resize(deletebtn.sizeHint())
         deletebtn.clicked.connect(self.delete_Click)
         deletebtn.toggle()
@@ -81,7 +83,7 @@ class MyApp(QMainWindow):
         renamebtn = QPushButton('Rename ', self)
         renamebtn.setCheckable(False)
         renamebtn.move(524, 20)
-        renamebtn.setIcon(QIcon('renameicon.png'))
+        renamebtn.setIcon(QIcon('LocalNetworkGUI/renameicon.png'))
         renamebtn.resize(renamebtn.sizeHint())
         renamebtn.clicked.connect(self.rename_Click)
         renamebtn.toggle()
@@ -90,7 +92,7 @@ class MyApp(QMainWindow):
         historybtn = QPushButton('History', self)
         historybtn.setCheckable(False)
         historybtn.move(670, 20)
-        historybtn.setIcon(QIcon('historyicon.png'))
+        historybtn.setIcon(QIcon('LocalNetworkGUI/historyicon.png'))
         historybtn.resize(historybtn.sizeHint())
         #historybtn.setStyleSheet('background: red;')
         historybtn.clicked.connect(QCoreApplication.instance().exit)
@@ -99,7 +101,7 @@ class MyApp(QMainWindow):
         ##Risk Label
         risk = QLabel(self)
         risk.resize(50, 50)
-        pixmap = QPixmap("riskicon.png")
+        pixmap = QPixmap("LocalNetworkGUI/riskicon.png")
         pixmap = pixmap.scaledToWidth(30)
         risk.setPixmap(QPixmap(pixmap))
         risk.move(640, 15)
@@ -107,7 +109,7 @@ class MyApp(QMainWindow):
 
         ##window
         self.setWindowTitle("Home IoT security")
-        self.setWindowIcon(QIcon('homeicon.png'))
+        self.setWindowIcon(QIcon('LocalNetworkGUI/homeicon.png'))
         self.setGeometry(300, 200, 801, 600)
         self.show()
 
@@ -126,7 +128,7 @@ class MyApp(QMainWindow):
 
         if reply == QMessageBox.Yes:
             self.iotList.currentItem().state = 1
-            self.iotList.currentItem().setIcon(QIcon('safeicon.png'))
+            self.iotList.currentItem().setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
             self.iotList.currentItem().setBackground(QColor(200, 255, 200))
             item = self.iotList.takeItem(self.iotList.currentRow())
             self.iotList.addItem(item)
@@ -176,7 +178,32 @@ class MyApp(QMainWindow):
 
     ##scan button
     def scan_Click(self):
-        print("Hi")
+        print("Starting scan")
+        self.scanner.scan_network_callback(lambda x: self.on_scan_completion(x))
+
+    def on_scan_completion(self, hosts):
+        print("Scan completed")
+        self.iotList.clear()
+        i = 0
+
+        for host in hosts:
+
+            item = QListWidgetItem()
+            item.state = 0
+            self.iotList.addItem(item)
+            item = self.iotList.item(i)
+            item.setText(host.get_GUI_name() + "\r\n\r\n")
+            if item.state == 0:
+                item.setIcon(QIcon('LocalNetworkGUI/dangericon.png'))
+                item.setBackground(QColor(255, 195, 200))
+            elif item.state == 1:
+                item.setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
+                item.setBackground(QColor(200, 255, 200))
+            else:
+                item.setIcon(QIcon('LocalNetworkGUI/disconnecticon.png'))
+                item.setBackground(QColor(200, 200, 200))
+            i += 1
+
 
 
 if __name__ == '__main__':
