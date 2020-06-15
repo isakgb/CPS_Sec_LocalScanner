@@ -7,11 +7,11 @@ import psutil
 from util.usersettings import UserSettings
 import socket
 
+
 class NetworkScanner():
 
     def __init__(self):
-        self.nmap_installed = None
-        #raise TypeError("Cannot create NetworkScanner. Use NetworkScanner.create()")
+        pass
 
     def scan_network(self, network_interface: NetworkInterface, port_scan=False) -> List[Host]:
         nmap_args = ["nmap"]
@@ -64,31 +64,6 @@ class NetworkScanner():
         threading.Thread(target=scan_network_with_callback).start()
 
 
-    @staticmethod
-    def create():
-        """
-        Creates and returns a NetworkScanner instance. If this a Unix-like system, returns an instance of NetworkScannerUnixLike,
-        and if this is a Windows system, returns an instance of NetworkScannerWindows.
-
-        :return: An instance of NetworkScanner for this operating system
-        """
-        # Figure out if this is a unix-like or windows system, and return the appropriate scanner instance
-
-        return NetworkScanner()
-        try:
-            run(["ifconfig", "--version"], stdout=PIPE)
-            print("OS is Unix-like")
-            return NetworkScannerUnixlike()
-        except FileNotFoundError as e:
-            pass
-
-        try:
-            run(["ipconfig", "--version"], stdout=PIPE)
-            print("OS is Windows")
-            return NetworkScannerWindows()
-        except FileNotFoundError:
-            print("Found neither ipconfig nor ifconfig")
-
     def get_network_interface(self) -> NetworkInterface:
         """
         Gets the active local interface with name specified form usersettings.json
@@ -104,9 +79,10 @@ class NetworkScanner():
         nif.subnet_mask = ipv4_interface.netmask
         return nif
 
+
 def check_nmap_installed():
     try:
-        d = run("ifconfig --version", stdout=PIPE)
+        d = run("nmap --version", stdout=PIPE)
         print("return code", d.returncode)
         print(d.stdout.decode())
     except FileNotFoundError as e:

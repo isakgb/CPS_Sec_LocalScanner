@@ -17,7 +17,7 @@ In the network package a few files related to network scanning can be found.
 
 `networkinterface.py` contains an object representation of network interfaces. 
 
-`network_scanner.py` contains the actual network scanner. Create a network scanner object by calling `scanner = NetworkScanner.create()`.
+`network_scanner.py` contains the actual network scanner. Create a network scanner object by calling `scanner = NetworkScanner()`.
 
 This object has methods such as:
 

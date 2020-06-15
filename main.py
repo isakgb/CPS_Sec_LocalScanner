@@ -12,7 +12,7 @@ def nmap_result_callback(hosts):
             print("    ", port.port_id, port.protocol, port.service)
 
 
-scanner = NetworkScanner.create()
+scanner = NetworkScanner()
 
 nif = scanner.get_network_interface()
 
