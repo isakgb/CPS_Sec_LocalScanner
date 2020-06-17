@@ -31,25 +31,6 @@ class MyApp(QMainWindow):
         self.iotList.setObjectName("iotList")
         self.iotList.setStyleSheet("border-color: gray;")
 
-        ##item list
-        _translate = QCoreApplication.translate
-        i = 0
-        for i in range(20):
-            item = QListWidgetItem()
-            item.state = 0
-            self.iotList.addItem(item)
-            item = self.iotList.item(i)
-            item.setText(_translate("iotList", " Device " + str(i + 1) + "\r\n\r\n"))
-            if item.state == 0:
-                item.setIcon(QIcon('LocalNetworkGUI/dangericon.png'))
-                item.setBackground(QColor(255, 195, 200))
-            elif item.state == 1:
-                item.setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
-                item.setBackground(QColor(200, 255, 200))
-            else:
-                item.setIcon(QIcon('LocalNetworkGUI/disconnecticon.png'))
-                item.setBackground(QColor(200, 200, 200))
-
 
         ##Scan Button
         scanbtn = QPushButton('Scan', self)
@@ -131,7 +112,14 @@ class MyApp(QMainWindow):
             self.iotList.currentItem().setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
             self.iotList.currentItem().setBackground(QColor(200, 255, 200))
             item = self.iotList.takeItem(self.iotList.currentRow())
+
+            trust = item.text().split(' ')[3] + "\n"
+            f = open('trusted', 'a')
+            f.write(trust)
+            f.close()
+
             self.iotList.addItem(item)
+
 
     def add_information(self):
         QMessageBox.information(self, 'information', 'Already Added!', QMessageBox.Ok)
@@ -148,6 +136,20 @@ class MyApp(QMainWindow):
             if self.iotList.currentItem().state == 0:
                 self.delete_question2()
             else:
+                f = open("trusted", 'r')
+                dataset = f.read()
+                f.close()
+
+                f = open("trusted", 'w')
+                f.close()
+
+                f = open("trusted", 'a')
+                itemList = dataset.split('\n')
+                for i in itemList:
+                    if self.iotList.currentItem().text().split(" ")[3] not in i:
+                        f.write(i + "\n")
+                f.close()
+
                 self.iotList.takeItem(self.iotList.currentRow())
 
     def delete_question2(self):
@@ -173,10 +175,29 @@ class MyApp(QMainWindow):
 
     def rename_edit(self):
         text, ok = QInputDialog.getText(self, 'Input Name', 'Enter new name:')
+        st = self.iotList.currentItem().text().split("\r\n")
+        self.iotList.currentItem().setText(st[0] + "\r\n" + str(text) + "\r\n")
         if ok:
-            self.iotList.currentItem().setText(' ' + str(text) + '\r\n\r\n')
+            f = open("trusted", 'r')
+            find = f.read()
+            f.close()
+
+            f = open("trusted", 'w')
+            f.close()
+
+            f = open("trusted", 'a')
+            itemList = find.split('\n')
+            for i in itemList:
+                if self.iotList.currentItem().text().split(" ")[3] in i:
+                    temp = i.split("=")
+                    f.write(temp[0] + "=" + str(text) + "\n")
+                else:
+                    f.write(i + '\n')
+            f.close()
+
 
     ##scan button
+
     def scan_Click(self):
         print("Starting scan")
         self.scanner.scan_network_callback(lambda x: self.on_scan_completion(x))
@@ -193,6 +214,17 @@ class MyApp(QMainWindow):
             self.iotList.addItem(item)
             item = self.iotList.item(i)
             item.setText(host.get_GUI_name() + "\r\n\r\n")
+
+            f = open("trusted", 'r')
+            while True:
+                line = f.readline()
+                if not line: break
+                if host.get_GUI_name().split(" ")[3] in line:
+                    temp = line.split("=")
+                    item.setText(host.get_GUI_name() + "\r\n" + temp[len(temp)-1])
+                    item.state = 1
+            f.close()
+
             if item.state == 0:
                 item.setIcon(QIcon('LocalNetworkGUI/dangericon.png'))
                 item.setBackground(QColor(255, 195, 200))
