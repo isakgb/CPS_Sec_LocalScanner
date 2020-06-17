@@ -13,7 +13,12 @@ def nmap_result_callback(hosts):
             print("    ", port.port_id, port.protocol, port.service)
 
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
 if __name__ == '__main__':
+    sys.excepthook = except_hook
     app = QApplication(sys.argv)
     ex = MyApp()
     sys.exit(app.exec_())

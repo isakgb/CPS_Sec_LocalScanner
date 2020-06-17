@@ -289,7 +289,8 @@ class MyApp(QMainWindow):
                 kick = False
 
                 for port in host.ports:
-                    if port not in allowed_ports:
+                    port_str = str(port.port_id)
+                    if port_str not in allowed_ports:
                         print("Device", host.get_GUI_name(), "has illegal port", port.port_id, "open!")
                         item_text_lines[3] = "    Illegal port {}. Deauthenticating from network...".format(port.port_id)
                         item_text_lines.append("")

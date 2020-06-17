@@ -44,8 +44,7 @@ class DeauthHandler():
     def deauth_device(host: Host, duration=-1):
 
         def thread_target():
-            if not DeauthHandler.is_card_monitor_mode:
-                DeauthHandler.__check_enable_monitor_mode()
+            DeauthHandler.__check_enable_monitor_mode()
 
             set_channel = ["airodump-ng", "-c", DeauthHandler.__find_wifi_channel(),
                            UserSettings.get_instance().mon_enabled_interface]
