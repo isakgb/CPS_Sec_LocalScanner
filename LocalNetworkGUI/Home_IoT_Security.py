@@ -5,6 +5,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from network.network_scanner import NetworkScanner
+from util.history import HistoryArchive
+from util.whitelist import Whitelist
+
 
 class MyApp(QMainWindow):
 
@@ -44,17 +47,26 @@ class MyApp(QMainWindow):
         ##Add Device Button
         addbtn = QPushButton('Add a device', self)
         addbtn.setCheckable(False)
-        addbtn.move(165, 20)
+        addbtn.move(115, 20)
         addbtn.setIcon(QIcon('LocalNetworkGUI/addicon.png'))
         addbtn.resize(addbtn.sizeHint())
         addbtn.clicked.connect(self.add_Click)
+        addbtn.toggle()
+
+        ##Add Semi trusted Device Button
+        addbtn = QPushButton('Add a semi trusted device', self)
+        addbtn.setCheckable(False)
+        addbtn.move(245, 20)
+        addbtn.setIcon(QIcon('LocalNetworkGUI/addicon.png'))
+        addbtn.resize(addbtn.sizeHint())
+        addbtn.clicked.connect(self.add_semitrusted_Click)
         addbtn.toggle()
 
 
         ##Delete Device Button
         deletebtn = QPushButton('Delete a device', self)
         deletebtn.setCheckable(False)
-        deletebtn.move(336, 20)
+        deletebtn.move(436, 20)
         deletebtn.setIcon(QIcon('LocalNetworkGUI/deleteicon.png'))
         deletebtn.resize(deletebtn.sizeHint())
         deletebtn.clicked.connect(self.delete_Click)
@@ -63,7 +75,7 @@ class MyApp(QMainWindow):
         ##Rename Button
         renamebtn = QPushButton('Rename ', self)
         renamebtn.setCheckable(False)
-        renamebtn.move(524, 20)
+        renamebtn.move(574, 20)
         renamebtn.setIcon(QIcon('LocalNetworkGUI/renameicon.png'))
         renamebtn.resize(renamebtn.sizeHint())
         renamebtn.clicked.connect(self.rename_Click)
@@ -122,6 +134,35 @@ class MyApp(QMainWindow):
 
 
     def add_information(self):
+        QMessageBox.information(self, 'information', 'Already Added!', QMessageBox.Ok)
+
+    ## add semi trusted button
+    def add_semitrusted_Click(self):
+        if self.iotList.currentItem().state == 0:
+            self.add_semitrusted_question()
+        else:
+            self.add_semitrusted_information()
+
+    def add_semitrusted_question(self):
+        reply = QMessageBox.question(self, 'question', 'Are you sure to add this device?',
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            self.iotList.currentItem().state = 2
+            self.iotList.currentItem().setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
+            self.iotList.currentItem().setBackground(QColor(255, 240, 150))
+            item = self.iotList.takeItem(self.iotList.currentRow())
+
+            Whitelist.get_instance().add_semiwhitelisted(item.host)
+
+            trust = item.text().split(' ')[3] + "\n"
+            f = open('trusted', 'a')
+            f.write(trust)
+            f.close()
+
+            self.iotList.addItem(item)
+
+    def add_semitrusted_information(self):
         QMessageBox.information(self, 'information', 'Already Added!', QMessageBox.Ok)
 
     ## delete button
@@ -200,17 +241,21 @@ class MyApp(QMainWindow):
 
     def scan_Click(self):
         print("Starting scan")
-        self.scanner.scan_network_callback(lambda x: self.on_scan_completion(x))
+        self.scanner.scan_network_callback(lambda x: self.on_scan_completion(x), port_scan=True)
 
     def on_scan_completion(self, hosts):
         print("Scan completed")
+        HistoryArchive.get_instance().add_scan(hosts)
         self.iotList.clear()
         i = 0
+
+        whitelist = Whitelist.get_instance()
 
         for host in hosts:
 
             item = QListWidgetItem()
             item.state = 0
+            item.host = host
             self.iotList.addItem(item)
             item = self.iotList.item(i)
             item.setText(host.get_GUI_name() + "\r\n\r\n")
@@ -225,7 +270,15 @@ class MyApp(QMainWindow):
                     item.state = 1
             f.close()
 
-            if item.state == 0:
+            if host.mac_address in whitelist.semiwhitelist:
+                allowed_ports = whitelist.semiwhitelist[host.mac_address]
+                item.state = 2
+                item.setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
+                item.setBackground(QColor(255, 240, 150))
+                for port in host.ports:
+                    if port not in allowed_ports:
+                        print("Device", host.get_GUI_name(), "has illegal port", port, "open!")
+            elif item.state == 0:
                 item.setIcon(QIcon('LocalNetworkGUI/dangericon.png'))
                 item.setBackground(QColor(255, 195, 200))
             elif item.state == 1:

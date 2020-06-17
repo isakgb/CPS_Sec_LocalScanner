@@ -10,6 +10,18 @@ class Host:
     def get_GUI_name(self):
         return "IP: {}, MAC: {} ({})".format(self.ip_address, self.mac_address, MacVendorsApi.get_instance().get_vendor(self.mac_address))
 
+    def to_dict(self):
+        ports = [{"port_id": x.port_id, "service": x.service, "protocol": x.protocol} for x in self.ports]
+        return {"ports": ports, "mac_address" : self.mac_address, "ip_address": self.ip_address}
+
+    @staticmethod
+    def from_dict(d):
+        host = Host()
+        host.mac_address = d["mac_address"]
+        host.ip_address = d["ip_address"]
+        host.ports = [Port(p["port_id"], p["service"], p["protocol"]) for p in d["ports"]]
+        return host
+
 
 class Port:
     def __init__(self, port_id, service, protocol):

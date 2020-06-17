@@ -8,7 +8,6 @@ class MacVendorsApi:
     instance = None
 
     def __init__(self, cache):
-        print("Creating macvendor with", cache)
         self.cache = cache
         MacVendorsApi.instance = self
 

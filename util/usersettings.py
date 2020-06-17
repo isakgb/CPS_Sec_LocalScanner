@@ -6,7 +6,6 @@ class UserSettings:
     instance = None
 
     def __init__(self, settings):
-        print("Loading userSettings with")
         self.settings = settings
         UserSettings.instance = self
         self.interface = self.settings["interface"]
@@ -16,8 +15,8 @@ class UserSettings:
         if UserSettings.instance is not None:
             return UserSettings.instance
         if Path("usersettings.json").exists():
-            macvendors_dict = json.load(open("usersettings.json", "r"))
-            return UserSettings(macvendors_dict)
+            d = json.load(open("usersettings.json", "r"))
+            return UserSettings(d)
         return UserSettings({})
 
     def add_scan(self, hosts):

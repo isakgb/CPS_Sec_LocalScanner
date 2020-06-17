@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
+import datetime
+
 
 class HistoryArchive:
 
     instance = None
 
     def __init__(self, history):
-        print("Loading historyarchive with")
         self.history = history
         HistoryArchive.instance = self
 
@@ -15,9 +16,15 @@ class HistoryArchive:
         if HistoryArchive.instance is not None:
             return HistoryArchive.instance
         if Path("history.json").exists():
-            macvendors_dict = json.load(open("history.json", "r"))
-            return HistoryArchive(macvendors_dict)
+            history_dict = json.load(open("history.json", "r"))
+            return HistoryArchive(history_dict)
         return HistoryArchive({})
 
     def add_scan(self, hosts):
-        pass
+        key = int(datetime.datetime.now().timestamp())
+        print("key =", key)
+        hosts_as_dict = [h.to_dict() for h in hosts]
+        self.history[key] = {"type" : "scan", "hosts": hosts_as_dict}
+
+        with open("history.json", "w") as f:
+            json.dump(self.history, f)
