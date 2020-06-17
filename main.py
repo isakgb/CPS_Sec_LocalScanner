@@ -1,5 +1,4 @@
 import sys
-
 from LocalNetworkGUI.Home_IoT_Security import MyApp, QApplication
 from util.macvendor import MacVendorsApi
 

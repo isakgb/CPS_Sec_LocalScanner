@@ -14,10 +14,11 @@ class NetworkScanner():
         pass
 
     def scan_network(self, network_interface: NetworkInterface, port_scan=False) -> List[Host]:
-        nmap_args = ["nmap"]
+        nmap_args = ["nmap", "-T5"]
         if not port_scan:
             nmap_args.append("-sn")
         nmap_args.append(network_interface.get_nmap_arg())
+        print("Starting scan \"{}\"".format(" ".join(nmap_args)))
         nmap_result = run(nmap_args, stdout=PIPE)
 
         next_host = None

@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from network.network_scanner import NetworkScanner
+from network.deauth import DeauthHandler
 from util.history import HistoryArchive
 from util.whitelist import Whitelist
 
@@ -38,13 +39,13 @@ class MyApp(QMainWindow):
 
 
         ##Scan Button
-        scanbtn = QPushButton('Scan', self)
-        scanbtn.setCheckable(False)
-        scanbtn.move(20, 20)
-        scanbtn.setIcon(QIcon('LocalNetworkGUI/scanicon.png'))
-        scanbtn.resize(scanbtn.sizeHint())
-        scanbtn.clicked.connect(self.scan_Click)
-        scanbtn.toggle()
+        self.scanbtn = QPushButton('Scan', self)
+        self.scanbtn.setCheckable(False)
+        self.scanbtn.move(20, 20)
+        self.scanbtn.setIcon(QIcon('LocalNetworkGUI/scanicon.png'))
+        self.scanbtn.resize(self.scanbtn.sizeHint())
+        self.scanbtn.clicked.connect(self.scan_Click)
+        self.scanbtn.toggle()
 
         ##Add Device Button
         addbtn = QPushButton('Add a device', self)
@@ -245,11 +246,13 @@ class MyApp(QMainWindow):
     ##scan button
 
     def scan_Click(self):
+        self.scanbtn.setEnabled(False)
         print("Starting scan")
         self.scanner.scan_network_callback(lambda x: self.on_scan_completion(x), port_scan=True)
 
     def on_scan_completion(self, hosts):
         print("Scan completed")
+        self.scanbtn.setEnabled(True)
         HistoryArchive.get_instance().add_scan(hosts)
         self.iotList.clear()
         i = 0
@@ -263,7 +266,7 @@ class MyApp(QMainWindow):
             item.host = host
             self.iotList.addItem(item)
             item = self.iotList.item(i)
-            item.setText(host.get_GUI_name() + "\r\n\r\n")
+            item_text_lines = [host.get_GUI_name(), "", "", ""]
 
             f = open("trusted", 'r')
             while True:
@@ -271,18 +274,28 @@ class MyApp(QMainWindow):
                 if not line: break
                 if host.get_GUI_name().split(" ")[3] in line:
                     temp = line.split("=")
-                    item.setText(host.get_GUI_name() + "\r\n" + temp[len(temp)-1])
+                    item_text_lines[1] = temp[len(temp)-1]
                     item.state = 1
             f.close()
+
+            if len(host.ports) > 0:
+                item_text_lines[2] = "  Ports: " + ", ".join((str(port.port_id) for port in host.ports))
 
             if host.mac_address in whitelist.semiwhitelist:
                 allowed_ports = whitelist.semiwhitelist[host.mac_address]
                 item.state = 2
                 item.setIcon(QIcon('LocalNetworkGUI/safeicon.png'))
                 item.setBackground(QColor(255, 240, 150))
+                kick = False
+
                 for port in host.ports:
                     if port not in allowed_ports:
-                        print("Device", host.get_GUI_name(), "has illegal port", port, "open!")
+                        print("Device", host.get_GUI_name(), "has illegal port", port.port_id, "open!")
+                        item_text_lines[3] = "    Illegal port {}. Deauthenticating from network...".format(port.port_id)
+                        item_text_lines.append("")
+                        kick = True
+                if kick:
+                    DeauthHandler.deauth_device(host, duration=20)
             elif item.state == 0:
                 item.setIcon(QIcon('LocalNetworkGUI/dangericon.png'))
                 item.setBackground(QColor(255, 195, 200))
@@ -292,6 +305,7 @@ class MyApp(QMainWindow):
             else:
                 item.setIcon(QIcon('LocalNetworkGUI/disconnecticon.png'))
                 item.setBackground(QColor(200, 200, 200))
+            item.setText("\r\n".join(item_text_lines))
             i += 1
 
 
