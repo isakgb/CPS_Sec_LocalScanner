@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from network.network_scanner import NetworkScanner
+from LocalNetworkGUI.HistoryGUI import HistoryGUI
 
 class MyApp(QMainWindow):
 
@@ -76,7 +77,7 @@ class MyApp(QMainWindow):
         historybtn.setIcon(QIcon('LocalNetworkGUI/historyicon.png'))
         historybtn.resize(historybtn.sizeHint())
         #historybtn.setStyleSheet('background: red;')
-        historybtn.clicked.connect(QCoreApplication.instance().exit)
+        historybtn.clicked.connect(self.history_Click)
         historybtn.toggle()
 
         ##Risk Label
@@ -194,7 +195,10 @@ class MyApp(QMainWindow):
                 else:
                     f.write(i + '\n')
             f.close()
-
+    
+    # history button
+    def history_Click(self):
+        history = HistoryGUI().__init__()
 
     ##scan button
 
