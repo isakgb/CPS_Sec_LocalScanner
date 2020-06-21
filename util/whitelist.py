@@ -1,7 +1,5 @@
 import json
 from pathlib import Path
-import requests
-from time import sleep
 from network.host import Host
 
 class Whitelist:
@@ -33,5 +31,10 @@ class Whitelist:
     def add_semiwhitelisted(self, host: Host):
         self.semiwhitelist[host.mac_address] = [x.port_id for x in host.ports]
         self.save()
+
+    def remove_semiwhitelisted(self, mac):
+        if mac in self.semiwhitelist:
+            del self.semiwhitelist[mac]
+            self.save()
 
 

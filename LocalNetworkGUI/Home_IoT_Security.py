@@ -194,6 +194,10 @@ class MyApp(QMainWindow):
                         f.write(i + "\n")
                 f.close()
 
+                mac = self.iotList.currentItem().host.mac_address
+                if mac in Whitelist.get_instance().semiwhitelist:
+                    Whitelist.get_instance().remove_semiwhitelisted(mac)
+
                 self.iotList.takeItem(self.iotList.currentRow())
 
     def delete_question2(self):
