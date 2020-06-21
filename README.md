@@ -5,11 +5,14 @@
 Create a file `usersettings.json` in the main directory which should look like this:
 ```
 {
-  "interface": "<name of interface for local network>"
+  "interface": "<name of interface for local network>",
+  "mon_disabled_interface": "<name of interface to use for monitor mode e.g. wlan0>",
+  "mon_enabled_interface": "<name of interface name for monitoring when its enabled e.g wlan0mon>",
+  "ap_mac_address": "<mac address of access point for deauth attack. find with iwconfig>"
 }
 ```
 
-##### Code implemented so far:
+##### Code implemented:
 
 In the network package a few files related to network scanning can be found.
  
@@ -26,6 +29,23 @@ This object has methods such as:
 `scanner.scan_network(nif, port_scan=False)` which takes a network interface as an argument and port_scan as an optional argument and returns a list of Host objects.
 
 `scanner.scan_network_callback(nif, callback, port_scan=False)` is similar to the aboce except it also takes a callback function as an argument. The scan will run asynchronously in a new thread and call the callback function with the result when it is done. This is useful as it prevent the scan from blocking the main thread.
+
+`deauth.py` contains functionality to deauthenticate devices from the network. This requires a network card that supports monitor
+mode. Sending deauthentication packets requires the network card to be changed into monitor mode, which will disconnect it from
+the internet. Because of this it is ideal to use a separate network card for monitor mode as this prevent interruptions in
+internet connectivity.
+
+In the util package there are some classes related to storing local data and for accessing the macvendors.com API.
+
+`history.py` contains results of previous network scans use to show historical data.
+
+`macvendor.py` contains code for accessing the macvendors.com API as well as storing the past lookups in a file to prevent
+unnecessary API calls due to the low rate limit of the API.
+
+`usersettings.py` contains user configurable settings stored in usersettings.json which tells the program which network 
+interfaces to use and which AP to use for deauth packets.
+
+`whitelist.py` contains semiwhitelist information and stores which devices are allowed to open which ports.
 
  # GUI
  
